@@ -1,0 +1,59 @@
+flightData = readtable('output.csv');
+cleanData = struct([]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Normalizing all of the data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% timestamp zeroing
+cleanData(1).timestamp_s = flightData.timestamp - min(flightData.timestamp);
+
+%% altitude time boot in ms to s
+cleanData(1).ATTITUDE_time_boot_s = data_norm(flightData.ATTITUDE_time_boot_ms,1e-3,false);
+
+%% attitude roll in euler angles (radians)
+cleanData(1).ATTITUDE_roll_rads = data_norm(flightData.ATTITUDE_roll,1,false);
+
+%% attitude pitch in euler angles (radians)
+cleanData(1).ATTITUDE_pitch_rads = data_norm(flightData.ATTITUDE_pitch,1,false);
+
+%% attitude yaw in euler angles (radians)
+cleanData(1).ATTITUDE_yaw_rads = data_norm(flightData.ATTITUDE_yaw,1,false);
+
+%% attitude roll speed in radians/s
+cleanData(1).ATTITUDE_rollspeed_rads = data_norm(flightData.ATTITUDE_rollspeed,1,false);
+
+%% attitude pitch speed in radians/s
+cleanData(1).ATTITUDE_pitchspeed_rads = data_norm(flightData.ATTITUDE_pitchspeed,1,false);
+
+%% attitude yaw speed in radians/s
+cleanData(1).ATTITUDE_yawspeed_rads = data_norm(flightData.ATTITUDE_yawspeed,1,false);
+
+%% SERVO_OUTPUT_RAW_time_usec in s
+cleanData(1).SERVO_OUTPUT_RAW_time_s = data_norm(flightData.SERVO_OUTPUT_RAW_time_usec,1e-6,false);
+
+%% SERVO_OUTPUT_RAW_port 
+cleanData(1).SERVO_OUTPUT_RAW_port = data_norm(flightData.SERVO_OUTPUT_RAW_port,1,false);
+
+%% SERVO_OUTPUT_RAW_servo1_raw normalized
+cleanData(1).SERVO_OUTPUT_RAW_servo1_raw = data_norm(flightData.SERVO_OUTPUT_RAW_servo1_raw,1,true);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% function to normalize the given data with a normalization factor
+function normOut =  data_norm(data, normFac, doFullNorm)
+    
+    if min(data) == max(data)
+        normOut = zeros(len(data))
+        return norm
+    end
+    %% fill NANs with values in the data
+    data = inpaint_nans(data);
+
+    %% convert values to desired format
+    normOut = data * normFac;
+    
+    %% if we desire to normalize between 0 and 1
+    if doFullNorm
+        normOut = (normOut - min(normOut))/(max(normOut) -  min(normOut));
+    end
+    
+end
