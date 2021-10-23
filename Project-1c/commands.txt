@@ -1,0 +1,17 @@
+
+sim_vehicle.py --out=udp:10.103.44.96:14550 --mavproxy-args="--aircraft test"
+
+wp load ../Tools/autotest/Generic_Missions/CMAC-toff-loop.txt
+arm throttle
+mode auto
+
+/home/pandii/CyberPhysicalSystemsSecurity/Project-1c/changed.param
+
+save params 
+param save /home/pandii/CyberPhysicalSystemsSecurity/Project-1c/saved-params-run-3
+
+load params
+param load /home/pandii/CyberPhysicalSystemsSecurity/Project-1c/changed.param
+
+python /home/pandii/pymavlink/tools/mavlogdump.py --format=csv --types=ATTITUDE,SERVO_OUTPUT_RAW,NAV_CONTROLLER_OUTPUT /home/pandii/ardupilot/ArduPlane/test/logs/2021-10-23/flight1/flight.tlog >~/.csv
+
