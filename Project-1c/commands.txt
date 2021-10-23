@@ -13,5 +13,7 @@ param save /home/pandii/CyberPhysicalSystemsSecurity/Project-1c/saved-params-run
 load params
 param load /home/pandii/CyberPhysicalSystemsSecurity/Project-1c/changed.param
 
-python /home/pandii/pymavlink/tools/mavlogdump.py --format=csv --types=ATTITUDE,SERVO_OUTPUT_RAW,NAV_CONTROLLER_OUTPUT /home/pandii/ardupilot/ArduPlane/test/logs/2021-10-23/flight1/flight.tlog >~/.csv
+param load /home/pandii/CyberPhysicalSystemsSecurity/Project-1c/noid.param
+
+python /home/pandii/pymavlink/tools/mavlogdump.py --format=csv --types=ATTITUDE,SERVO_OUTPUT_RAW,NAV_CONTROLLER_OUTPUT /home/pandii/ardupilot/ArduPlane/test/logs/2021-10-23/flight2/flight.tlog > change-out-take2.csv
 
