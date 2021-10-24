@@ -39,7 +39,7 @@ clf
 plot(k, C);
 title(sprintf('Beta = %0.1f, eta = %0.3f', Beta, eta));
 legend()
-pause()
+
 
 %% Question 2 %%%%%%%%%%%%%%%%%%%%
 ac = [0.9132 -0.1434; 0.009561 0.9993];
@@ -59,7 +59,6 @@ sys = ss(ac,bc,cc,dc,tstep);
 cts_tf = tf(A_tf,B_tf,tstep);
 step(cts_tf)
 legend('Discrete time statevarible system')
-pause()
 
 %% Question 4 %%%%%%%%%%%%%%%%%%%%
 zeta = 1;
@@ -92,12 +91,10 @@ H_s = tf(denominator_model - denominator_plant, numerator_plant);
 H_z =  c2d(H_s,tstep, 'zoh')
 
 %% Question 6 %%%%%%%%%%%%%%%%%%%%
-y = [C_OUTPUT(1)];
-x = C_INPUTS(:,1);
+y = C_OUTPUT(1);
+x = C_INPUTS(1,1);
 for i = 2:length(k)
-    y(end+1) = -1.059e4*x(i) - 1.055e4*x(i - 1) + 0.9903*y(i-1);
+    y(end+1) = -1.059e04*x(i) - 1.055e04*x(i - 1) + 0.9903*y(i -1);
 end
 
 plot(y)
-legend()
-pause()
