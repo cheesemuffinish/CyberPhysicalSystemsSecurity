@@ -1,4 +1,4 @@
-flightData = readtable('output.csv');
+flightData = readtable('noid-out.csv');
 cleanData = struct([]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Normalizing all of the data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,8 +64,87 @@ cleanData(1).NAV_CONTROLLER_OUTPUT_aspd_error = data_norm(flightData.NAV_CONTROL
 %% NAV_CONTROLLER_OUTPUT_xtrack_error normalized
 cleanData(1).NAV_CONTROLLER_OUTPUT_xtrack_error = data_norm(flightData.NAV_CONTROLLER_OUTPUT_xtrack_error,1,false);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Project 1C
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LSM%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ROLL_ERROR = cleanData(1).NAV_CONTROLLER_OUTPUT_nav_roll - cleanData(1).ATTITUDE_roll_rads;
+servo_output = cleanData.SERVO_OUTPUT_RAW_servo1_raw;
+
+alsm = inv(ROLL_ERROR'*ROLL_ERROR)*ROLL_ERROR'*servo_output;
+
+
+%% RLSM procedure 
+N = length(ROLL_ERROR);
+Beta = 0.3;
+P = 0.5 * eye(1);
+C = [0];
+savedC1 = [];
+starting_val = 3000;
+normal_var = 622.6610;
+normal_mean = 1.2400;
+win = 3000;
+scaleFactor = 4
+
+for i = 1:N
+    Kalman = ( P*ROLL_ERROR(i,:)' )/( 1 + ROLL_ERROR(i,:)*P*ROLL_ERROR(i,:)' );
+    C = C + Kalman*( servo_output(i) - ROLL_ERROR(i,:)*C );
+    P = ( eye(1) - Kalman*ROLL_ERROR(i,:) )*P/Beta; 
+
+    % save values for plotting later 
+    savedC1 = [savedC1 C(1)];
+
+    if i >= starting_val+win
+        testData = savedC1(i-win:i);
+        if mean(testData) < normal_mean/scaleFactor ||mean(testData) >= normal_mean*scaleFactor
+           sprintf("Anomoly detected from the mean at index %i",i )
+        end
+        if var(testData) < normal_var/scaleFactor ||var(testData) >= normal_var*scaleFactor
+            sprintf("Anomoly detected from the variance at index %i",i)
+        end
+    end
+end
+
+%%coefficient of determiniation
+C = [savedC1];
+error = servo_output - dot(ROLL_ERROR',C');
+mean_E = mean(error);
+var_E = 0;
+for j = 1:N
+    var_E  = var_E + (error(j) - mean_E)^2;
+end
+
+var_E = var_E/N
+var_Y = var(y);
+eta = 1 - var_E / var_Y;
+
+%plots
+colors = get(gca,'colororder');
+
+k = 1:N;
+clf
+plot(k, C,'.');
+title(sprintf('Beta = %0.1f, eta = %0.3f', Beta, eta));
+
+%% Step 8
+
+
+
+%plot(k, c(:,2),'.','color',colors(2,:));
+%plot(k, savedC2,'color',colors(2,:));
+%
+%plot(k, c(:,3),'.','color',colors(3,:));
+%plot(k, savedC3,'color',colors(3,:));
+
+
+%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Project 1C
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LSM%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 %%%%% plot the data %%%%%
+
 plot(diff(cleanData(1).timestamp_s))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
